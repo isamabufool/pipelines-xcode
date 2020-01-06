@@ -8,8 +8,34 @@ pool:
 
 steps:
 - task: Xcode@5
+  displayName: 'Build the app using Xcode'
   inputs:
-    scheme: ''
+    actions: 'build'
     sdk: 'iphoneos'
-    configuration: 'Release'
-    xcodeVersion: 'default' # Options: 8, 9, default, specifyPath
+    scheme: 'iOSHelloWorld'
+    configuration: 'Debug'
+    xcWorkspacePath: '**/*.xcodeproj/project.xcworkspace'
+    useXcpretty: 'false'
+
+- task: Xcode@5
+  displayName: 'Build the app using Xcode'
+  inputs:
+    actions: 'clean build analyze archive'
+    sdk: 'iphoneos'
+    scheme: 'iOSHelloWorld'
+    configuration: 'Debug'
+    xcWorkspacePath: '**/*.xcodeproj/project.xcworkspace'
+    useXcpretty: 'false'
+    args: '-archivePath $(agent.buildDirectory)/iOSHelloWorld'
+
+- task: ArchiveFiles@2
+  displayName: 'Package .xcarchive into a zip file'
+  inputs:
+    rootFolderOrFile: '$(agent.buildDirectory)/iOSHelloWorld.xcarchive/'
+    archiveFile: '$(build.artifactStagingDirectory)/iOSHelloWorld.xcarchive.zip'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(build.artifactStagingDirectory)/iOSHelloWorld.xcarchive.zip'
+    artifactName: 'xcarchive-files'
+    artifactType: 'container'
